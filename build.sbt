@@ -25,7 +25,8 @@ lazy val `akka-sample-cqrs-scala` = project
         "de.innfactory"     %% "akka-persistence-gcp-datastore"         % GCPPersistencePlugin,
         "commons-io"        % "commons-io"                              % "2.4"                      % Test,
         "com.typesafe.akka" %% "akka-actor-testkit-typed"               % AkkaVersion                % Test,
-        "org.scalatest"     %% "scalatest"                              % "3.0.8"                    % Test
+        "org.scalatest"     %% "scalatest"                              % "3.0.8"                    % Test,
+        "org.pegdown"       % "pegdown"                                % "1.6.0"                    % Test
     ),
     fork in run := false,
     Global / cancelable := false, // ctrl-c
@@ -38,3 +39,4 @@ lazy val `akka-sample-cqrs-scala` = project
     licenses := Seq(("CC0", url("http://creativecommons.org/publicdomain/zero/1.0"))))
 
 testOptions += Tests.Setup(_ => sys.props("testing") = "true")
+testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-h",  "./target/html-report")
