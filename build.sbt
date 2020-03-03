@@ -1,7 +1,11 @@
-val AkkaVersion = "2.6.1"
+val AkkaVersion = "2.6.3"
 val AkkaPersistenceCassandraVersion = "0.100"
 val AkkaHttpVersion = "10.1.10"
-val GCPPersistencePlugin = "1.0.0"
+
+val GCPPersistencePlugin = sys.env.get("GCPPersistencePlugin") match {
+    case Some(version) => version
+    case None => 0.0.1
+}
 
 lazy val `akka-sample-cqrs-scala` = project
   .in(file("."))
@@ -26,7 +30,8 @@ lazy val `akka-sample-cqrs-scala` = project
         "commons-io"        % "commons-io"                              % "2.4"                      % Test,
         "com.typesafe.akka" %% "akka-actor-testkit-typed"               % AkkaVersion                % Test,
         "org.scalatest"     %% "scalatest"                              % "3.0.8"                    % Test,
-        "org.pegdown"       % "pegdown"                                % "1.6.0"                    % Test
+        "org.pegdown"       % "pegdown"                                % "1.6.0"                    % Test,
+        "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % Test
     ),
     fork in run := false,
     Global / cancelable := false, // ctrl-c
