@@ -13,7 +13,7 @@ lazy val `akka-sample-cqrs-scala` = project
     organization := "com.lightbend.akka.samples",
     version := "1.0",
     scalaVersion := "2.13.1",
-    scalacOptions in Compile ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
+    scalacOptions in Compile ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint", "-Ywarn-unused"),
     javacOptions in Compile ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
     libraryDependencies ++= Seq(
       "com.typesafe.akka"    %% "akka-cluster-sharding-typed"         % AkkaVersion,

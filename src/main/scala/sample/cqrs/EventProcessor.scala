@@ -6,11 +6,10 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
 import akka.persistence.datastore.journal.read.DatastoreScaladslReadJournal
-import akka.persistence.query.{NoOffset, Offset, PersistenceQuery, TimeBasedUUID}
+import akka.persistence.query.{NoOffset, Offset, PersistenceQuery}
 import akka.persistence.typed.PersistenceId
 import akka.stream.{KillSwitches, SharedKillSwitch}
 import akka.stream.scaladsl.{RestartSource, Sink, Source}
-import com.datastax.driver.core.Row
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{ExecutionContext, Future}
