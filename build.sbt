@@ -2,9 +2,9 @@ val AkkaVersion = "2.6.3"
 val AkkaPersistenceCassandraVersion = "0.100"
 val AkkaHttpVersion = "10.1.10"
 
-val GCPPersistencePlugin = sys.env.get("GCP_PLUGIN_VERSION") match {
+val GCPPersistencePlugin : String = sys.env.get("GCP_PLUGIN_VERSION") match {
     case Some(version) => version
-    case None => 0.0.1
+    case None => "0.0.1"
 }
 
 lazy val `akka-sample-cqrs-scala` = project
