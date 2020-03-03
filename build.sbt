@@ -2,7 +2,7 @@ val AkkaVersion = "2.6.3"
 val AkkaPersistenceCassandraVersion = "0.100"
 val AkkaHttpVersion = "10.1.10"
 
-val GCPPersistencePlugin = sys.env.get("GCPPersistencePlugin") match {
+val GCPPersistencePlugin = sys.env.get("GCP_PLUGIN_VERSION") match {
     case Some(version) => version
     case None => 0.0.1
 }
