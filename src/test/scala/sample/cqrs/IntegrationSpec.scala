@@ -1,28 +1,18 @@
 package sample.cqrs
 
-import java.io.File
-
-import scala.concurrent.duration._
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.typed.eventstream.EventStream
 import akka.cluster.MemberStatus
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.cluster.typed.Cluster
-import akka.cluster.typed.Join
+import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
-import akka.persistence.cassandra.testkit.CassandraLauncher
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory
-import org.apache.commons.io.FileUtils
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.Matchers
-import org.scalatest.TestSuite
-import org.scalatest.WordSpecLike
-import org.scalatest.concurrent.Eventually
-import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.concurrent.ScalaFutures
+import com.typesafe.config.{Config, ConfigFactory}
+import org.scalatest.concurrent.{Eventually, PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.Span
+import org.scalatest.{BeforeAndAfterAll, Matchers, TestSuite, WordSpecLike}
+
+import scala.concurrent.duration._
 
 object IntegrationSpec {
   val config: Config = ConfigFactory.parseString(s"""
@@ -63,8 +53,8 @@ class IntegrationSpec
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-    val request = HttpRequest(uri = "http://localhost:8081/reset",  method = HttpMethods.POST)
-    val http = Http(testKit1.system)
+    val request = HttpRequest(uri = "http://localhost:8081/reset", method = HttpMethods.POST)
+    val http    = Http(testKit1.system)
     http.singleRequest(
       request
     )
@@ -72,8 +62,8 @@ class IntegrationSpec
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    val request = HttpRequest(uri = "http://localhost:8081/reset",  method = HttpMethods.POST)
-    val http = Http(testKit1.system)
+    val request = HttpRequest(uri = "http://localhost:8081/reset", method = HttpMethods.POST)
+    val http    = Http(testKit1.system)
     http.singleRequest(
       request
     )
@@ -83,7 +73,6 @@ class IntegrationSpec
     testKit1.shutdownTestKit()
   }
 
-
   "Shopping Cart application" should {
 
     "init and join Cluster" in {
@@ -92,23 +81,19 @@ class IntegrationSpec
       testKit3.spawn[Nothing](Guardian(), "guardian")
       // node4 is initialized and joining later
 
-      systems3.foreach { sys =>
-        Cluster(sys).manager ! Join(Cluster(testKit1.system).selfMember.address)
-      }
+      systems3.foreach(sys => Cluster(sys).manager ! Join(Cluster(testKit1.system).selfMember.address))
 
       // let the nodes join and become Up
       eventually(PatienceConfiguration.Timeout(10.seconds)) {
-        systems3.foreach { sys =>
-          Cluster(sys).selfMember.status should ===(MemberStatus.Up)
-        }
+        systems3.foreach(sys => Cluster(sys).selfMember.status should ===(MemberStatus.Up))
       }
     }
 
     "update and consume from different nodes" in {
-      val cart1 = ClusterSharding(testKit1.system).entityRefFor(ShoppingCart.EntityKey, "cart-1")
+      val cart1  = ClusterSharding(testKit1.system).entityRefFor(ShoppingCart.EntityKey, "cart-1")
       val probe1 = testKit1.createTestProbe[ShoppingCart.Confirmation]
 
-      val cart2 = ClusterSharding(testKit2.system).entityRefFor(ShoppingCart.EntityKey, "cart-2")
+      val cart2  = ClusterSharding(testKit2.system).entityRefFor(ShoppingCart.EntityKey, "cart-2")
       val probe2 = testKit2.createTestProbe[ShoppingCart.Confirmation]
 
       val eventProbe3 = testKit3.createTestProbe[ShoppingCart.Event]()
@@ -140,7 +125,7 @@ class IntegrationSpec
         Cluster(testKit4.system).selfMember.status should ===(MemberStatus.Up)
       }
 
-      val cart3 = ClusterSharding(testKit1.system).entityRefFor(ShoppingCart.EntityKey, "cart-3")
+      val cart3  = ClusterSharding(testKit1.system).entityRefFor(ShoppingCart.EntityKey, "cart-3")
       val probe3 = testKit1.createTestProbe[ShoppingCart.Confirmation]
 
       val eventProbe4 = testKit4.createTestProbe[ShoppingCart.Event]()

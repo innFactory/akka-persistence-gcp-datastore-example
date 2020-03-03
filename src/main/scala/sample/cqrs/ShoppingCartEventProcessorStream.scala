@@ -9,11 +9,11 @@ import akka.actor.typed.eventstream.EventStream
 import akka.persistence.typed.PersistenceId
 
 class ShoppingCartEventProcessorStream(
-    system: ActorSystem[_],
-    executionContext: ExecutionContext,
-    eventProcessorId: String,
-    tag: String)
-    extends EventProcessorStream[ShoppingCart.Event](system, executionContext, eventProcessorId, tag) {
+  system: ActorSystem[_],
+  executionContext: ExecutionContext,
+  eventProcessorId: String,
+  tag: String
+) extends EventProcessorStream[ShoppingCart.Event](system, executionContext, eventProcessorId, tag) {
 
   def processEvent(event: ShoppingCart.Event, persistenceId: PersistenceId, sequenceNr: Long): Future[Done] = {
     log.info("EventProcessor({}) consumed {} from {} with seqNr {}", tag, event, persistenceId, sequenceNr)
@@ -21,7 +21,6 @@ class ShoppingCartEventProcessorStream(
     Future.successful(Done)
   }
 
-  def processPersistenceId(persistenceId: String): Future[Done] = {
+  def processPersistenceId(persistenceId: String): Future[Done] =
     Future.successful(Done)
-  }
 }

@@ -7,21 +7,21 @@ import com.typesafe.config.Config
 
 object EventProcessorSettings {
 
-  def apply(system: ActorSystem[_]): EventProcessorSettings = {
+  def apply(system: ActorSystem[_]): EventProcessorSettings =
     apply(system.settings.config.getConfig("event-processor"))
-  }
 
   def apply(config: Config): EventProcessorSettings = {
-    val id: String = config.getString("id")
+    val id: String                        = config.getString("id")
     val keepAliveInterval: FiniteDuration = config.getDuration("keep-alive-interval").toMillis.millis
-    val tagPrefix: String = config.getString("tag-prefix")
-    val parallelism: Int = config.getInt("parallelism")
+    val tagPrefix: String                 = config.getString("tag-prefix")
+    val parallelism: Int                  = config.getInt("parallelism")
     EventProcessorSettings(id, keepAliveInterval, tagPrefix, parallelism)
   }
 }
 
 final case class EventProcessorSettings(
-    id: String,
-    keepAliveInterval: FiniteDuration,
-    tagPrefix: String,
-    parallelism: Int)
+  id: String,
+  keepAliveInterval: FiniteDuration,
+  tagPrefix: String,
+  parallelism: Int
+)

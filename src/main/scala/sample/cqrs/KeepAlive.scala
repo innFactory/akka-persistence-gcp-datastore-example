@@ -19,12 +19,14 @@ object KeepAlive {
     val settings = EventProcessorSettings(system)
     ClusterSingleton(system).init(
       SingletonActor(KeepAlive(settings, eventProcessorEntityKey), s"keepAlive-${settings.id}")
-        .withSettings(ClusterSingletonSettings(system).withRole("read-model")))
+        .withSettings(ClusterSingletonSettings(system).withRole("read-model"))
+    )
   }
 
   def apply(
-      settings: EventProcessorSettings,
-      eventProcessorEntityKey: EntityTypeKey[EventProcessor.Ping.type]): Behavior[Probe.type] = {
+    settings: EventProcessorSettings,
+    eventProcessorEntityKey: EntityTypeKey[EventProcessor.Ping.type]
+  ): Behavior[Probe.type] =
     Behaviors.setup { context =>
       Behaviors.withTimers { timers =>
         val sharding = ClusterSharding(context.system)
@@ -41,5 +43,4 @@ object KeepAlive {
       }
     }
 
-  }
 }

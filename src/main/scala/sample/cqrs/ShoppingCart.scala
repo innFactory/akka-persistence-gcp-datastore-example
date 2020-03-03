@@ -47,12 +47,11 @@ object ShoppingCart {
     def isEmpty: Boolean =
       items.isEmpty
 
-    def updateItem(itemId: String, quantity: Int): State = {
+    def updateItem(itemId: String, quantity: Int): State =
       quantity match {
         case 0 => copy(items = items - itemId)
         case _ => copy(items = items + (itemId -> quantity))
       }
-    }
 
     def removeItem(itemId: String): State =
       copy(items = items - itemId)
@@ -128,15 +127,14 @@ object ShoppingCart {
 
   val EntityKey: EntityTypeKey[Command] = EntityTypeKey[Command]("ShoppingCart")
 
-  def init(system: ActorSystem[_], eventProcessorSettings: EventProcessorSettings): Unit = {
+  def init(system: ActorSystem[_], eventProcessorSettings: EventProcessorSettings): Unit =
     ClusterSharding(system).init(Entity(EntityKey) { entityContext =>
-      val n = math.abs(entityContext.entityId.hashCode % eventProcessorSettings.parallelism)
+      val n                 = math.abs(entityContext.entityId.hashCode % eventProcessorSettings.parallelism)
       val eventProcessorTag = eventProcessorSettings.tagPrefix + "-" + n
       ShoppingCart(entityContext.entityId, Set(eventProcessorTag))
     }.withRole("write-model"))
-  }
 
-  def apply(cartId: String, eventProcessorTags: Set[String]): Behavior[Command] = {
+  def apply(cartId: String, eventProcessorTags: Set[String]): Behavior[Command] =
     EventSourcedBehavior
       .withEnforcedReplies[Command, Event, State](
         PersistenceId(EntityKey.name, cartId),
@@ -146,11 +144,11 @@ object ShoppingCart {
           // The commands are handled differently for each case.
           if (state.isCheckedOut) checkedOutShoppingCart(cartId, state, command)
           else openShoppingCart(cartId, state, command),
-        (state, event) => handleEvent(state, event))
+        (state, event) => handleEvent(state, event)
+      )
       .withTagger(_ => eventProcessorTags)
       .withRetention(RetentionCriteria.snapshotEvery(numberOfEvents = 100, keepNSnapshots = 3))
       .onPersistFailure(SupervisorStrategy.restartWithBackoff(200.millis, 5.seconds, 0.1))
-  }
 
   private def openShoppingCart(cartId: String, state: State, command: Command): ReplyEffect[Event, State] =
     command match {
@@ -206,12 +204,11 @@ object ShoppingCart {
         Effect.reply(cmd.replyTo)(Rejected("Can't checkout already checked out shopping cart"))
     }
 
-  private def handleEvent(state: State, event: Event) = {
+  private def handleEvent(state: State, event: Event) =
     event match {
       case ItemAdded(_, itemId, quantity)            => state.updateItem(itemId, quantity)
       case ItemRemoved(_, itemId)                    => state.removeItem(itemId)
       case ItemQuantityAdjusted(_, itemId, quantity) => state.updateItem(itemId, quantity)
       case CheckedOut(_, eventTime)                  => state.checkout(eventTime)
     }
-  }
 }

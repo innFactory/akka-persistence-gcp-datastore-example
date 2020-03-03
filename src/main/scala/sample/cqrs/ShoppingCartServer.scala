@@ -14,11 +14,11 @@ import akka.{ actor => classic }
 class ShoppingCartServer(routes: Route, port: Int, system: ActorSystem[_]) {
   import akka.actor.typed.scaladsl.adapter._
   implicit val classicSystem: classic.ActorSystem = system.toClassic
-  private val shutdown = CoordinatedShutdown(classicSystem)
+  private val shutdown                            = CoordinatedShutdown(classicSystem)
 
   import system.executionContext
 
-  def start(): Unit = {
+  def start(): Unit =
     Http().bindAndHandle(routes, "localhost", port).onComplete {
       case Success(binding) =>
         val address = binding.localAddress
@@ -35,6 +35,5 @@ class ShoppingCartServer(routes: Route, port: Int, system: ActorSystem[_]) {
         system.log.error("Failed to bind HTTP endpoint, terminating system", ex)
         system.terminate()
     }
-  }
 
 }

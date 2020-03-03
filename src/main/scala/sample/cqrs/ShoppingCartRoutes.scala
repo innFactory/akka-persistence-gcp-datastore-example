@@ -1,14 +1,12 @@
 package sample.cqrs
 
-import scala.concurrent.Future
-import scala.concurrent.duration._
-
-import akka.actor.typed.ActorRef
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
+
+import scala.concurrent.Future
 
 object ShoppingCartRoutes {
   final case class AddItem(cartId: String, itemId: String, quantity: Int)
@@ -21,10 +19,10 @@ class ShoppingCartRoutes()(implicit system: ActorSystem[_]) {
     Timeout.create(system.settings.config.getDuration("shopping.askTimeout"))
   private val sharding = ClusterSharding(system)
 
+  import JsonFormats._
   import ShoppingCartRoutes._
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   import akka.http.scaladsl.server.Directives._
-  import JsonFormats._
 
   val shopping: Route =
     pathPrefix("shopping") {
@@ -52,7 +50,7 @@ class ShoppingCartRoutes()(implicit system: ActorSystem[_]) {
                   if (data.quantity == 0) ShoppingCart.RemoveItem(data.itemId, replyTo)
                   else ShoppingCart.AdjustItemQuantity(data.itemId, data.quantity, replyTo)
 
-                val reply: Future[ShoppingCart.Confirmation] = entityRef.ask(command(_))
+                val reply: Future[ShoppingCart.Confirmation] = entityRef.ask(command)
                 onSuccess(reply) {
                   case ShoppingCart.Accepted(summary) =>
                     complete(StatusCodes.OK -> summary)
@@ -62,25 +60,29 @@ class ShoppingCartRoutes()(implicit system: ActorSystem[_]) {
             }
           },
           pathPrefix(Segment) { cartId =>
-            concat(get {
-              val entityRef = sharding.entityRefFor(ShoppingCart.EntityKey, cartId)
-              onSuccess(entityRef.ask(ShoppingCart.Get)) { summary =>
-                if (summary.items.isEmpty) complete(StatusCodes.NotFound)
-                else complete(summary)
-              }
-            }, path("checkout") {
-              post {
+            concat(
+              get {
                 val entityRef = sharding.entityRefFor(ShoppingCart.EntityKey, cartId)
-                val reply: Future[ShoppingCart.Confirmation] = entityRef.ask(ShoppingCart.Checkout(_))
-                onSuccess(reply) {
-                  case ShoppingCart.Accepted(summary) =>
-                    complete(StatusCodes.OK -> summary)
-                  case ShoppingCart.Rejected(reason) =>
-                    complete(StatusCodes.BadRequest, reason)
+                onSuccess(entityRef.ask(ShoppingCart.Get)) { summary =>
+                  if (summary.items.isEmpty) complete(StatusCodes.NotFound)
+                  else complete(summary)
+                }
+              },
+              path("checkout") {
+                post {
+                  val entityRef                                = sharding.entityRefFor(ShoppingCart.EntityKey, cartId)
+                  val reply: Future[ShoppingCart.Confirmation] = entityRef.ask(ShoppingCart.Checkout)
+                  onSuccess(reply) {
+                    case ShoppingCart.Accepted(summary) =>
+                      complete(StatusCodes.OK -> summary)
+                    case ShoppingCart.Rejected(reason) =>
+                      complete(StatusCodes.BadRequest, reason)
+                  }
                 }
               }
-            })
-          })
+            )
+          }
+        )
       }
     }
 
@@ -92,9 +94,10 @@ object JsonFormats {
   // import the default encoders for primitive types (Int, String, Lists etc)
   import spray.json.DefaultJsonProtocol._
 
-  implicit val summaryFormat: RootJsonFormat[ShoppingCart.Summary] = jsonFormat2(ShoppingCart.Summary)
+  implicit val summaryFormat: RootJsonFormat[ShoppingCart.Summary]       = jsonFormat2(ShoppingCart.Summary)
   implicit val addItemFormat: RootJsonFormat[ShoppingCartRoutes.AddItem] = jsonFormat3(ShoppingCartRoutes.AddItem)
   implicit val updateItemFormat: RootJsonFormat[ShoppingCartRoutes.UpdateItem] = jsonFormat3(
-    ShoppingCartRoutes.UpdateItem)
+    ShoppingCartRoutes.UpdateItem
+  )
 
 }

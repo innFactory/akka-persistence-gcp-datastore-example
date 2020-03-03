@@ -1,27 +1,19 @@
 package sample.cqrs
 
-import java.io.File
 import java.util.concurrent.CountDownLatch
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.typed.Cluster
-import akka.persistence.cassandra.testkit.CassandraLauncher
-import akka.persistence.datastore.journal.read.DatastoreScaladslReadJournal
-import akka.persistence.query.PersistenceQuery
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 
 object Main {
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     args.headOption match {
 
       case Some(portString) if portString.matches("""\d+""") =>
-        val port = portString.toInt
+        val port     = portString.toInt
         val httpPort = ("80" + portString.takeRight(2)).toInt
         startNode(port, httpPort)
 
@@ -32,11 +24,10 @@ object Main {
       case None =>
         throw new IllegalArgumentException("port number, or cassandra required argument")
     }
-  }
 
   def startNode(port: Int, httpPort: Int): Unit = {
-    val system = ActorSystem[Nothing](Guardian(), "Shopping", config(port, httpPort))
-
+    ActorSystem[Nothing](Guardian(), "Shopping", config(port, httpPort))
+    ()
   }
 
   def config(port: Int, httpPort: Int): Config =
@@ -45,15 +36,12 @@ object Main {
       shopping.http.port = $httpPort
        """).withFallback(ConfigFactory.load())
 
-
-
-
 }
 
 object Guardian {
-  def apply(): Behavior[Nothing] = {
+  def apply(): Behavior[Nothing] =
     Behaviors.setup[Nothing] { context =>
-      val system = context.system
+      val system   = context.system
       val settings = EventProcessorSettings(system)
       val httpPort = context.system.settings.config.getInt("shopping.http.port")
 
@@ -63,7 +51,8 @@ object Guardian {
         EventProcessor.init(
           system,
           settings,
-          tag => new ShoppingCartEventProcessorStream(system, system.executionContext, settings.id, tag))
+          tag => new ShoppingCartEventProcessorStream(system, system.executionContext, settings.id, tag)
+        )
       }
 
       val routes = new ShoppingCartRoutes()(context.system)
@@ -71,5 +60,4 @@ object Guardian {
 
       Behaviors.empty
     }
-  }
 }
