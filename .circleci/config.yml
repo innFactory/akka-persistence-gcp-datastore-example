@@ -22,8 +22,9 @@ jobs:
       - run:
           name: Build latest akka-persistence-gcp-datastore lib from master
           command: |
-            git clone https://$GIT_USER:$GIT_SSHKEY@github.com/innFactory/akka-persistence-gcp-datastore-example.git ~/akka-persistence-gcp-datastore-example
-            cd akka-persistence-gcp-datastore-example
+            cd $HOME
+            git clone https://$GIT_USER:$GIT_SSHKEY@github.com/innFactory/akka-persistence-gcp-datastore-example.git
+            cd $HOME/akka-persistence-gcp-datastore-example
             sbt test
             sbt publishLocal
             echo 'export GCP_PLUGIN_VERSION="$(sbt version | tail -1 | egrep -o \"[0-9].[0-9].[0-9]\")"' >> $BASH_ENV
