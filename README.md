@@ -1,4 +1,5 @@
 # Akka persistence gcp datastore example
+[![CircleCI](https://circleci.com/gh/innFactory/akka-persistence-gcp-datastore-example.svg?style=svg&circle-token=e94b6445a0d9cabc3b0d301eec13ec96b32a3968)](https://circleci.com/gh/innFactory/akka-persistence-gcp-datastore-example)
 
 This example is based on Lightbend [CQRS-SAMPLE](https://developer.lightbend.com/start/?group=akka&project=akka-samples-cqrs-scala)
 
@@ -21,3 +22,6 @@ Events from the shopping carts are tagged and consumed by the read model.
 The read model is implemented in such a way that 'load' is sharded over a number of processors. This number is `event-processor.parallelism`.
 
 The implementation is resilient: it uses an *Akka Cluster Singleton* in combination with *Akka Cluster Sharding* to always keep the event processors alive.
+
+## Credits
+[innFactory GmbH](https://innfactory.de)
