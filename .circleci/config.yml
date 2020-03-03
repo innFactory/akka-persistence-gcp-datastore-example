@@ -26,9 +26,9 @@ jobs:
             git clone https://$GIT_USER:$GIT_SSHKEY@github.com/innFactory/akka-persistence-gcp-datastore.git
             cd $HOME/akka-persistence-gcp-datastore
             pwd
-            sbt test
             sbt publishLocal
-            echo 'export GCP_PLUGIN_VERSION="$(sbt version | tail -1 | egrep -o \"[0-9].[0-9].[0-9]\")"' >> $BASH_ENV
+            GCP_PLUGIN_VERSION="$(sbt version | tail -1 | egrep -o '[0-9].[0-9].[0-9]')"
+            echo "export GCP_PLUGIN_VERSION=$GCP_PLUGIN_VERSION" >> $BASH_ENV
             source $BASH_ENV
             echo "Current Plugin Version is: ${GCP_PLUGIN_VERSION}"
             cd ..
