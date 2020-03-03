@@ -1,7 +1,7 @@
 val AkkaVersion = "2.6.1"
 val AkkaPersistenceCassandraVersion = "0.100"
 val AkkaHttpVersion = "10.1.10"
-val GCPPersistencePlugin = "0.3.0"
+val GCPPersistencePlugin = "1.0.0"
 
 lazy val `akka-sample-cqrs-scala` = project
   .in(file("."))
