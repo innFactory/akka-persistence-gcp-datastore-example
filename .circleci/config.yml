@@ -20,10 +20,6 @@ jobs:
           command: gcloud config set project build && gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0
           background: true
       - run:
-          name: clear datastore
-          command:
-            curl -X POST http://localhost:8081/reset
-      - run:
           name: run example tests
           command: |
             sbt test
