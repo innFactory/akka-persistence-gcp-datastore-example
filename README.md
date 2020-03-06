@@ -7,7 +7,7 @@ This example contains a sample illustrating an CQRS design with [Akka Cluster Sh
 
 ## Overview
 
-This sample application implements a CQRS-ES design that will side-effect in the read model on selected events persisted to Cassandra by the write model. In this sample, the side-effect is logging a line. A more practical example would be to send a message to a Kafka topic or update a relational database.
+This sample application implements a CQRS-ES design that will side-effect in the read model on selected events persisted to google cloud datastore by the write model. In this sample, the side-effect is logging a line. A more practical example would be to send a message to a Kafka topic or update a relational database.
 
 ## Write model
 
