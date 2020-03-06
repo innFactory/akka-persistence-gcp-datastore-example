@@ -20,27 +20,13 @@ jobs:
           command: gcloud config set project build && gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0
           background: true
       - run:
-          name: Build latest akka-persistence-gcp-datastore lib from master
-          command: |
-            cd $HOME
-            git clone https://$GIT_USER:$GIT_SSHKEY@github.com/innFactory/akka-persistence-gcp-datastore.git
-            cd $HOME/akka-persistence-gcp-datastore
-            pwd
-            sbt publishLocal
-            GCP_PLUGIN_VERSION="$(sbt version | tail -1 | egrep -o '[0-9].[0-9].[0-9]')"
-            echo "export GCP_PLUGIN_VERSION=$GCP_PLUGIN_VERSION" >> $BASH_ENV
-            source $BASH_ENV
-            echo "Current Plugin Version is: ${GCP_PLUGIN_VERSION}"
-            cd ..
-            pwd
-      - run:
           name: clear datastore
           command:
             curl -X POST http://localhost:8081/reset
       - run:
           name: run example tests
           command: |
-            sbt -DGCP_PLUGIN_VERSION=${GCP_PLUGIN_VERSION} test
+            sbt test
       - save_cache:
           paths:
             - "~/.iv2/cache"
